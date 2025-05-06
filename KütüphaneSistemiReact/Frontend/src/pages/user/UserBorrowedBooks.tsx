@@ -89,14 +89,6 @@ const UserBorrowedBooks: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-                    <p className="truncate">
-                      {borrowedBook.book && borrowedBook.book.description
-                        ? `"${borrowedBook.book.description.substring(0, 150)}..."`
-                        : "No description available."}
-                    </p>
-                  </div>
-
                   <div className="flex space-x-2">
                     <Link to={`/user/book/${borrowedBook.book.id}`} className="flex-1">
                       <Button variant="outline" size="sm" fullWidth>
