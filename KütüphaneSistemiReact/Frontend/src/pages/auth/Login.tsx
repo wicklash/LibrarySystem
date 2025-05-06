@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/UI/Input';
@@ -9,8 +9,14 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const { login, loading, error } = useAuth();
+  const { login, loading, error, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/'); // Redirect to homepage or desired route
+    }
+  }, [user, navigate]);
 
   const validateForm = () => {
     let formErrors: { email?: string; password?: string } = {};

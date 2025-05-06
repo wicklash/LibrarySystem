@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { mockLogin, mockRegister } from '../data/mockData';
 
 interface AuthContextType {
   user: User | null;
@@ -32,14 +31,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const user = await mockLogin(email, password);
-      if (user) {
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.ok) {
+        const user = await response.json();
         setUser(user);
         localStorage.setItem('user', JSON.stringify(user));
       } else {
-        setError('Invalid email or password');
+        const data = await response.json();
+        setError(data.detail || 'Invalid email or password');
       }
     } catch (err) {
       setError('An error occurred during login');
@@ -52,14 +57,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (username: string, email: string, password: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const user = await mockRegister(username, email, password);
-      if (user) {
+      const response = await fetch('http://localhost:8000/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }),
+      });
+      if (response.ok) {
+        const user = await response.json();
         setUser(user);
         localStorage.setItem('user', JSON.stringify(user));
       } else {
-        setError('Email already exists');
+        const data = await response.json();
+        setError(data.detail || 'Registration failed');
       }
     } catch (err) {
       setError('An error occurred during registration');
