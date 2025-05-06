@@ -147,15 +147,10 @@ export const getUserBorrowedBooks = async (userId: string): Promise<BorrowedBook
 };
 
 // Get user's borrowing history
-export const getUserBorrowHistory = (userId: string): Promise<BorrowedBook[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const userHistory = borrowedBooks.filter(
-        borrow => borrow.userId === userId && borrow.returnDate
-      );
-      resolve(userHistory);
-    }, 500);
-  });
+export const getUserBorrowHistory = async (userId: string): Promise<BorrowedBook[]> => {
+  const response = await fetch(`http://localhost:8000/borrowed/history/${userId}`);
+  if (!response.ok) throw new Error("Failed to fetch borrow history");
+  return await response.json();
 };
 
 // Get all active borrows (admin)

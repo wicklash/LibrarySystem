@@ -89,7 +89,11 @@ const UserBookHistory: React.FC = () => {
                       </div>
                       
                       <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-                        <p className="truncate">"{historyBook.book.description.substring(0, 150)}..."</p>
+                        <p className="truncate">
+                          {typeof historyBook.book?.description === 'string'
+                            ? `"${historyBook.book.description.substring(0, 150)}..."`
+                            : ''}
+                        </p>
                       </div>
                     </div>
                   </div>

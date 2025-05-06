@@ -59,3 +59,28 @@ def get_user_borrowed_books(user_id: int, db: Session = Depends(get_db)):
             }
         })
     return result
+
+@router.get("/history/{user_id}", response_model=List[BorrowedBookOut])
+def get_user_borrow_history(user_id: int, db: Session = Depends(get_db)):
+    borrows = db.query(BorrowedBook).filter(
+        BorrowedBook.UserId == user_id,
+        BorrowedBook.ReturnDate != None
+    ).all()
+    result = []
+    for borrow in borrows:
+        book = db.query(Book).filter(Book.Id == borrow.BookId).first()
+        result.append({
+            "id": borrow.Id,
+            "bookId": borrow.BookId,
+            "userId": borrow.UserId,
+            "borrowDate": borrow.BorrowDate.isoformat(),
+            "dueDate": borrow.DueDate.isoformat(),
+            "returnDate": borrow.ReturnDate.isoformat() if borrow.ReturnDate else None,
+            "book": {
+                "id": book.Id,
+                "title": book.Title,
+                "author": book.Author,
+                "coverImage": book.CoverImage
+            }
+        })
+    return result
