@@ -140,15 +140,10 @@ export const returnBook = (borrowId: string): Promise<BorrowedBook | null> => {
 };
 
 // Get user's borrowed books
-export const getUserBorrowedBooks = (userId: string): Promise<BorrowedBook[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const userBorrows = borrowedBooks.filter(
-        borrow => borrow.userId === userId && !borrow.returnDate
-      );
-      resolve(userBorrows);
-    }, 500);
-  });
+export const getUserBorrowedBooks = async (userId: string): Promise<BorrowedBook[]> => {
+  const response = await fetch(`http://localhost:8000/borrowed/user/${userId}`);
+  if (!response.ok) throw new Error("Failed to fetch borrowed books");
+  return await response.json();
 };
 
 // Get user's borrowing history
