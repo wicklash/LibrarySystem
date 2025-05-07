@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/UI/Input';
 import Button from '../../components/UI/Button';
@@ -17,7 +17,6 @@ const Register: React.FC = () => {
     confirmPassword?: string;
   }>({});
   const { register, loading, error } = useAuth();
-  const navigate = useNavigate();
 
   const validateForm = () => {
     let formErrors: {

@@ -1,5 +1,5 @@
 import { Book, User, BorrowedBook, Message, LibraryStats } from '../types';
-import { addDays, subDays, format } from 'date-fns';
+import { addDays, subDays } from 'date-fns';
 
 export const users: User[] = [
   {
@@ -215,7 +215,7 @@ export const mockLogin = (email: string, password: string): Promise<User | null>
   });
 };
 
-export const mockRegister = (username: string, email: string, password: string): Promise<User | null> => {
+export const mockRegister = (username: string, email: string): Promise<User | null> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const exists = users.some(u => u.email === email);

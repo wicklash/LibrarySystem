@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import AdminLayout from '../../components/Layout/AdminLayout';
-import { Card, CardBody } from '../../components/UI/Card';
+import { Card } from '../../components/UI/Card';
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
 import { MessageSquare, Send, User, ArrowLeft, Search } from 'lucide-react';

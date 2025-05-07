@@ -5,7 +5,7 @@ import StatCard from '../../components/UI/StatCard';
 import { Card, CardHeader, CardBody } from '../../components/UI/Card';
 import Button from '../../components/UI/Button';
 import { Book, BookOpen, History, MessageSquare, Award } from 'lucide-react';
-import { books, borrowedBooks, libraryStats } from '../../data/mockData';
+import { libraryStats } from '../../data/mockData';
 import { useAuth } from '../../context/AuthContext';
 import { getUserBorrowedBooks } from '../../services/bookService';
 import { getUnreadMessageCount } from '../../services/messageService';
