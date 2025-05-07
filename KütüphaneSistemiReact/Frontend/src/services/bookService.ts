@@ -11,13 +11,10 @@ export const getAllBooks = (): Promise<Book[]> => {
 };
 
 // Get book by ID
-export const getBookById = (id: string): Promise<Book | undefined> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const book = books.find(book => book.id === id);
-      resolve(book);
-    }, 300);
-  });
+export const getBookById = async (id: string): Promise<Book | undefined> => {
+  const response = await fetch(`http://localhost:8000/books/${id}`);
+  if (!response.ok) return undefined;
+  return await response.json();
 };
 
 // Add new book
@@ -67,41 +64,16 @@ export const deleteBook = (id: string): Promise<boolean> => {
 };
 
 // Borrow a book
-export const borrowBook = (userId: string, bookId: string): Promise<BorrowedBook | null> => {
-  return new Promise((resolve) => {
-    setTimeout(async () => {
-      const book = await getBookById(bookId);
-      
-      if (!book || book.availableCopies <= 0) {
-        resolve(null);
-        return;
-      }
-      
-      // Update book availability
-      await updateBook(bookId, {
-        availableCopies: book.availableCopies - 1,
-        available: book.availableCopies - 1 > 0,
-      });
-      
-      // Create borrowed record
-      const now = new Date();
-      const dueDate = new Date();
-      dueDate.setDate(now.getDate() + 30); // Default 30-day borrow period
-      
-      const newBorrow: BorrowedBook = {
-        id: (borrowedBooks.length + 1).toString(),
-        bookId,
-        userId,
-        borrowDate: now.toISOString(),
-        dueDate: dueDate.toISOString(),
-        returnDate: null,
-        book: book,
-      };
-      
-      borrowedBooks.push(newBorrow);
-      resolve(newBorrow);
-    }, 700);
+export const borrowBook = async (userId: string, bookId: string): Promise<any> => {
+  const response = await fetch('http://localhost:8000/borrowed/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId: Number(userId), bookId: Number(bookId) }),
   });
+  if (!response.ok) return null;
+  return await response.json();
 };
 
 // Return a book

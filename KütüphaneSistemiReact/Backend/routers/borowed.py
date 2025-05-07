@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import BorrowedBook, Book
 from typing import List
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 
 router = APIRouter(
     prefix="/borrowed",
@@ -34,6 +35,10 @@ class BorrowedBookOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+class BorrowRequest(BaseModel):
+    userId: int
+    bookId: int
 
 @router.get("/user/{user_id}", response_model=List[BorrowedBookOut])
 def get_user_borrowed_books(user_id: int, db: Session = Depends(get_db)):
@@ -84,3 +89,31 @@ def get_user_borrow_history(user_id: int, db: Session = Depends(get_db)):
             }
         })
     return result
+
+@router.post("/", response_model=dict)
+def borrow_book(request: BorrowRequest, db: Session = Depends(get_db)):
+    # Kitabı bul
+    book = db.query(Book).filter(Book.Id == request.bookId).first()
+    if not book or book.AvailableCopies <= 0:
+        raise HTTPException(status_code=400, detail="Book not available")
+
+    # Kitap kopya sayısını güncelle
+    book.AvailableCopies -= 1
+    if book.AvailableCopies == 0:
+        book.Available = 0
+    db.commit()
+
+    # BorrowedBook kaydı oluştur
+    now = datetime.now()
+    due = now + timedelta(days=30)
+    borrowed = BorrowedBook(
+        BookId=request.bookId,
+        UserId=request.userId,
+        BorrowDate=now,
+        DueDate=due,
+        ReturnDate=None
+    )
+    db.add(borrowed)
+    db.commit()
+    db.refresh(borrowed)
+    return {"success": True, "borrowId": borrowed.Id}
