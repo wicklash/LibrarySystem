@@ -13,7 +13,7 @@ import {
   BookPlus,
   MessageSquare,
 } from 'lucide-react';
-import { getAllBooks, getAllActiveBorrows } from '../../services/bookService';
+import { getAllActiveBorrows } from '../../services/bookService';
 import { getUserMessages } from '../../services/messageService';
 import { libraryStats, users } from '../../data/mockData';
 import { BorrowedBook } from '../../types';

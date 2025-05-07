@@ -166,15 +166,15 @@ const BookDetails: React.FC = () => {
             
             <div className="md:col-span-2">
               <Card>
-                <CardBody>
+                <CardHeader>
                   <h1 className="text-3xl font-display font-bold text-gray-900 mb-2">{book.title}</h1>
-                  <p className="text-xl text-gray-600 mb-6">by {book.author}</p>
-                  
+                  <p className="text-xl text-gray-600 mb-2">by {book.author}</p>
+                </CardHeader>
+                <CardBody>
                   <div className="bg-primary-50 rounded-lg p-6 mb-8">
                     <h2 className="text-lg font-semibold text-primary-800 mb-3">Overview</h2>
                     <p className="text-primary-700">{book.description}</p>
                   </div>
-                  
                   <div className="space-y-6">
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900 mb-3">Details</h2>
@@ -186,7 +186,6 @@ const BookDetails: React.FC = () => {
                             <p className="text-gray-800">{book.title}</p>
                           </div>
                         </div>
-                        
                         <div className="flex items-start space-x-3">
                           <User size={20} className="text-gray-400 mt-0.5" />
                           <div>
@@ -194,7 +193,6 @@ const BookDetails: React.FC = () => {
                             <p className="text-gray-800">{book.author}</p>
                           </div>
                         </div>
-                        
                         <div className="flex items-start space-x-3">
                           <Clock size={20} className="text-gray-400 mt-0.5" />
                           <div>
@@ -202,7 +200,6 @@ const BookDetails: React.FC = () => {
                             <p className="text-gray-800">{book.publishYear}</p>
                           </div>
                         </div>
-                        
                         <div className="flex items-start space-x-3">
                           <Calendar size={20} className="text-gray-400 mt-0.5" />
                           <div>
@@ -212,7 +209,6 @@ const BookDetails: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900 mb-3">Borrowing Information</h2>
                       <div className="bg-gray-50 rounded-lg p-4">
@@ -226,6 +222,9 @@ const BookDetails: React.FC = () => {
                     </div>
                   </div>
                 </CardBody>
+                <CardFooter>
+                  <p className="text-sm text-gray-500">Kitapla ilgili sorularınız için kütüphane personeline başvurabilirsiniz.</p>
+                </CardFooter>
               </Card>
             </div>
           </div>
