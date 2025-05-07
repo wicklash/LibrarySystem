@@ -61,3 +61,17 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         "email": new_user.Email,
         "role": new_user.Role
     }
+
+@router.get("/users")
+def get_all_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return [
+        {
+            "id": user.Id,
+            "username": user.Username,
+            "email": user.Email,
+            "role": user.Role,
+            "createdAt": user.CreatedAt
+        }
+        for user in users
+    ]

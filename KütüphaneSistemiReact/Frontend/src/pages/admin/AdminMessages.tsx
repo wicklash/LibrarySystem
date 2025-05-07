@@ -6,7 +6,7 @@ import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
 import { MessageSquare, Send, User, ArrowLeft, Search } from 'lucide-react';
 import { getUserMessages, sendMessage, markMessageAsRead } from '../../services/messageService';
-import { users } from '../../data/mockData';
+import { getAllUsers } from '../../services/userService';
 import { Message, User as UserType } from '../../types';
 
 const AdminMessages: React.FC = () => {
@@ -16,70 +16,61 @@ const AdminMessages: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [users, setUsers] = useState<UserType[]>([]);
   
   // Get admin user (for sending messages)
   const adminUser = users.find(u => u.role === 'admin');
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      if (adminUser) {
-        try {
-          const data = await getUserMessages(adminUser.id);
-          // Mark messages as read when admin opens them
-          const updatedMessages = await Promise.all(
-            data.map(async (message) => {
-              if (message.receiverId === adminUser.id && !message.read) {
-                await markMessageAsRead(message.id);
-                return { ...message, read: true };
-              }
-              return message;
-            })
-          );
-          
-          setAllMessages(updatedMessages);
-        } catch (error) {
-          console.error('Error fetching messages:', error);
-        } finally {
+    const fetchUsersAndMessages = async () => {
+      setIsLoading(true);
+      try {
+        const userList = await getAllUsers();
+        setUsers(userList);
+
+        const admin = userList.find(u => u.role === 'admin');
+        if (!admin) {
           setIsLoading(false);
+          return;
         }
+
+        const data = await getUserMessages(admin.id);
+
+        // Mesajları okundu olarak işaretle
+        const updatedMessages = await Promise.all(
+          data.map(async (message) => {
+            if (message.receiverId === admin.id && !message.read) {
+              await markMessageAsRead(message.id);
+              return { ...message, read: true };
+            }
+            return message;
+          })
+        );
+        setAllMessages(updatedMessages);
+      } catch (error) {
+        console.error('Error fetching users or messages:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-
-    fetchMessages();
-  }, [adminUser]);
+    fetchUsersAndMessages();
+  }, []);
 
   const getUserById = (userId: string): UserType | undefined => {
     return users.find(user => user.id === userId);
   };
 
-  // Get unique chats (users who have messaged or been messaged by the admin)
-  const getUniqueChats = (): string[] => {
-    if (!adminUser) return [];
-    
-    const chatUserIds = new Set<string>();
-    
-    allMessages.forEach(message => {
-      if (message.senderId === adminUser.id) {
-        chatUserIds.add(message.receiverId);
-      } else {
-        chatUserIds.add(message.senderId);
-      }
-    });
-    
-    return Array.from(chatUserIds);
-  };
-
   // Filter chats based on search query
-  const filteredChats = getUniqueChats().filter(userId => {
-    const user = getUserById(userId);
-    if (!user || !searchQuery) return true;
-    
-    const query = searchQuery.toLowerCase();
-    return (
-      user.username.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query)
-    );
-  });
+  const filteredChats = users
+    .filter(user => user.role !== 'admin')
+    .filter(user => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        user.username.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query)
+      );
+    });
 
   // Get messages for the current chat
   const getCurrentChatMessages = (): Message[] => {
@@ -179,28 +170,26 @@ const AdminMessages: React.FC = () => {
                 </div>
               ) : filteredChats.length > 0 ? (
                 <div className="divide-y divide-gray-200">
-                  {filteredChats.map(userId => {
-                    const user = getUserById(userId);
-                    const unreadCount = getUnreadCount(userId);
-                    
+                  {filteredChats.map(user => {
+                    const unreadCount = getUnreadCount(user.id);
                     return (
                       <button
-                        key={userId}
+                        key={user.id}
                         className={`w-full text-left px-4 py-3 hover:bg-gray-50 focus:outline-none ${
-                          currentChat === userId ? 'bg-primary-50' : ''
+                          currentChat === user.id ? 'bg-primary-50' : ''
                         }`}
-                        onClick={() => handleChatSelect(userId)}
+                        onClick={() => handleChatSelect(user.id)}
                       >
                         <div className="flex items-center space-x-3">
                           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            {user?.username.charAt(0).toUpperCase()}
+                            {user.username.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 truncate">
-                              {user?.username}
+                              {user.username}
                             </p>
                             <p className="text-xs text-gray-500 truncate">
-                              {user?.email}
+                              {user.email}
                             </p>
                           </div>
                           {unreadCount > 0 && (

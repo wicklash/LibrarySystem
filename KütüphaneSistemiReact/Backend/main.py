@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import users
 from routers import borowed
 from routers import books
+from routers import messages
 
 app = FastAPI()
 
@@ -20,3 +21,4 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(borowed.router)
 app.include_router(books.router)
+app.include_router(messages.router)

@@ -8,7 +8,7 @@ import { MessageSquare, Send, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getUserMessages, sendMessage, markMessageAsRead } from '../../services/messageService';
 import { Message } from '../../types';
-import { users } from '../../data/mockData';
+import { getAllUsers } from '../../services/userService';
 
 const UserMessages: React.FC = () => {
   const { user } = useAuth();
@@ -16,14 +16,16 @@ const UserMessages: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
-
-  // Find admin user for sending messages
-  const adminUser = users.find(u => u.role === 'admin');
+  const [adminUser, setAdminUser] = useState<any>(null);
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    const fetchAdminAndMessages = async () => {
       if (user) {
         try {
+          // Admin kullanıcıyı backend'den çek
+          const users = await getAllUsers();
+          const admin = users.find(u => u.role === 'admin');
+          setAdminUser(admin);
           const data = await getUserMessages(user.id);
           
           // Mark messages as read
@@ -39,14 +41,14 @@ const UserMessages: React.FC = () => {
           
           setMessages(updatedMessages);
         } catch (error) {
-          console.error('Error fetching messages:', error);
+          console.error('Error fetching admin or messages:', error);
         } finally {
           setIsLoading(false);
         }
       }
     };
 
-    fetchMessages();
+    fetchAdminAndMessages();
   }, [user]);
 
   const handleSendMessage = async (e: React.FormEvent) => {

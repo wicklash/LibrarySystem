@@ -35,3 +35,12 @@ class BorrowedBook(Base):
     BorrowDate = Column(DateTime)
     DueDate = Column(DateTime)
     ReturnDate = Column(DateTime, nullable=True)
+
+class Message(Base):
+    __tablename__ = "Messages"
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    SenderId = Column(Integer, ForeignKey("Users.Id"))
+    ReceiverId = Column(Integer, ForeignKey("Users.Id"))
+    Content = Column(String)
+    Read = Column(Integer)  # 0 veya 1 olarak tutulabilir (bool yerine int)
+    CreatedAt = Column(DateTime)
