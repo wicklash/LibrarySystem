@@ -117,3 +117,44 @@ def borrow_book(request: BorrowRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(borrowed)
     return {"success": True, "borrowId": borrowed.Id}
+
+@router.post("/return/{borrow_id}", response_model=dict)
+def return_book(borrow_id: int, db: Session = Depends(get_db)):
+    borrow = db.query(BorrowedBook).filter(BorrowedBook.Id == borrow_id, BorrowedBook.ReturnDate == None).first()
+    if not borrow:
+        raise HTTPException(status_code=404, detail="Borrow record not found or already returned")
+
+    # İade tarihi ekle
+    borrow.ReturnDate = datetime.now()
+    db.commit()
+
+    # Kitap kopya sayısını güncelle
+    book = db.query(Book).filter(Book.Id == borrow.BookId).first()
+    if book:
+        book.AvailableCopies += 1
+        book.Available = 1
+        db.commit()
+
+    return {"success": True}
+
+@router.get("/active", response_model=List[BorrowedBookOut])
+def get_all_active_borrows(db: Session = Depends(get_db)):
+    borrows = db.query(BorrowedBook).filter(BorrowedBook.ReturnDate == None).all()
+    result = []
+    for borrow in borrows:
+        book = db.query(Book).filter(Book.Id == borrow.BookId).first()
+        result.append({
+            "id": borrow.Id,
+            "bookId": borrow.BookId,
+            "userId": borrow.UserId,
+            "borrowDate": borrow.BorrowDate.isoformat(),
+            "dueDate": borrow.DueDate.isoformat(),
+            "returnDate": borrow.ReturnDate.isoformat() if borrow.ReturnDate else None,
+            "book": {
+                "id": book.Id,
+                "title": book.Title,
+                "author": book.Author,
+                "coverImage": book.CoverImage
+            }
+        })
+    return result

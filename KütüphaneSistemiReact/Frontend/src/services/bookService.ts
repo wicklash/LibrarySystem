@@ -1,13 +1,10 @@
 import { Book, BorrowedBook } from '../types';
-import { books, borrowedBooks } from '../data/mockData';
 
 // Get all books
-export const getAllBooks = (): Promise<Book[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([...books]);
-    }, 500);
-  });
+export const getAllBooks = async (): Promise<Book[]> => {
+  const response = await fetch('http://localhost:8000/books');
+  if (!response.ok) return [];
+  return await response.json();
 };
 
 // Get book by ID
@@ -18,49 +15,38 @@ export const getBookById = async (id: string): Promise<Book | undefined> => {
 };
 
 // Add new book
-export const addBook = (book: Omit<Book, 'id' | 'addedAt'>): Promise<Book> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newBook: Book = {
-        ...book,
-        id: (books.length + 1).toString(),
-        addedAt: new Date().toISOString(),
-      };
-      books.push(newBook);
-      resolve(newBook);
-    }, 500);
+export const addBook = async (book: Omit<Book, 'id' | 'addedAt'>): Promise<Book> => {
+  const response = await fetch('http://localhost:8000/books', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(book),
   });
+  if (!response.ok) throw new Error('Kitap eklenemedi');
+  return await response.json();
 };
 
 // Update book
-export const updateBook = (id: string, updates: Partial<Book>): Promise<Book | undefined> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const index = books.findIndex(book => book.id === id);
-      if (index !== -1) {
-        const updatedBook = { ...books[index], ...updates };
-        books[index] = updatedBook;
-        resolve(updatedBook);
-      } else {
-        resolve(undefined);
-      }
-    }, 500);
+export const updateBook = async (id: string, updates: Partial<Book>): Promise<Book> => {
+  const response = await fetch(`http://localhost:8000/books/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updates),
   });
+  if (!response.ok) throw new Error('Kitap güncellenemedi');
+  return await response.json();
 };
 
 // Delete book
-export const deleteBook = (id: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const index = books.findIndex(book => book.id === id);
-      if (index !== -1) {
-        books.splice(index, 1);
-        resolve(true);
-      } else {
-        resolve(false);
-      }
-    }, 500);
+export const deleteBook = async (id: string): Promise<boolean> => {
+  const response = await fetch(`http://localhost:8000/books/${id}`, {
+    method: 'DELETE',
   });
+  if (!response.ok) throw new Error('Kitap silinemedi');
+  return true;
 };
 
 // Borrow a book
@@ -77,38 +63,15 @@ export const borrowBook = async (userId: string, bookId: string): Promise<any> =
 };
 
 // Return a book
-export const returnBook = (borrowId: string): Promise<BorrowedBook | null> => {
-  return new Promise((resolve) => {
-    setTimeout(async () => {
-      const borrowIndex = borrowedBooks.findIndex(b => b.id === borrowId);
-      
-      if (borrowIndex === -1) {
-        resolve(null);
-        return;
-      }
-      
-      const borrow = borrowedBooks[borrowIndex];
-      
-      // Update borrow record
-      const updatedBorrow = {
-        ...borrow,
-        returnDate: new Date().toISOString(),
-      };
-      
-      borrowedBooks[borrowIndex] = updatedBorrow;
-      
-      // Update book availability
-      const book = await getBookById(borrow.bookId);
-      if (book) {
-        await updateBook(borrow.bookId, {
-          availableCopies: book.availableCopies + 1,
-          available: true,
-        });
-      }
-      
-      resolve(updatedBorrow);
-    }, 700);
+export const returnBook = async (borrowId: string): Promise<any> => {
+  const response = await fetch(`http://localhost:8000/borrowed/return/${borrowId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
   });
+  if (!response.ok) return null;
+  return await response.json();
 };
 
 // Get user's borrowed books
@@ -126,11 +89,8 @@ export const getUserBorrowHistory = async (userId: string): Promise<BorrowedBook
 };
 
 // Get all active borrows (admin)
-export const getAllActiveBorrows = (): Promise<BorrowedBook[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const activeBorrows = borrowedBooks.filter(borrow => !borrow.returnDate);
-      resolve(activeBorrows);
-    }, 500);
-  });
+export const getAllActiveBorrows = async (): Promise<BorrowedBook[]> => {
+  const response = await fetch('http://localhost:8000/borrowed/active');
+  if (!response.ok) return [];
+  return await response.json();
 };
