@@ -44,3 +44,21 @@ class Message(Base):
     Content = Column(String)
     Read = Column(Integer)  # 0 veya 1 olarak tutulabilir (bool yerine int)
     CreatedAt = Column(DateTime)
+
+class Review(Base):
+    __tablename__ = "Reviews"
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    BookId = Column(Integer, ForeignKey("Books.Id"))
+    UserId = Column(Integer, ForeignKey("Users.Id"))
+    Rating = Column(Integer)  # 1-5 arası puan
+    Comment = Column(String)
+    Likes = Column(Integer, default=0)
+    Dislikes = Column(Integer, default=0)
+    CreatedAt = Column(DateTime)
+
+class Favorite(Base):
+    __tablename__ = "Favorites"
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    UserId = Column(Integer, ForeignKey("Users.Id"))
+    BookId = Column(Integer, ForeignKey("Books.Id"))
+    CreatedAt = Column(DateTime)
