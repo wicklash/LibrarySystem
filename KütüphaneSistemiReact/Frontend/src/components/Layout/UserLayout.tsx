@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { BookOpen, Book as Books, History, MessageSquare, Home, LogOut, Menu, X, Heart } from 'lucide-react';
 
@@ -44,13 +44,13 @@ const UserLayout: React.FC<UserLayoutProps> = ({ children, title }) => {
           </div>
 
           <div className="p-4 border-b border-gray-200">
-            <div className="flex flex-col items-center">
+            <Link to="/user/profile" className="flex flex-col items-center cursor-pointer hover:bg-primary-50 rounded-lg p-2 transition">
               <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center text-primary-800 text-2xl font-bold mb-2">
                 {user?.username.charAt(0).toUpperCase()}
               </div>
               <p className="text-lg font-semibold">{user?.username}</p>
               <p className="text-sm text-gray-500">{user?.email}</p>
-            </div>
+            </Link>
           </div>
 
           <nav className="flex-1 p-4 space-y-1">

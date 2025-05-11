@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User
@@ -22,6 +22,11 @@ class UserRegister(BaseModel):
     username: str
     email: str
     password: str
+
+class UserUpdate(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    password: str | None = None
 
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
@@ -75,3 +80,37 @@ def get_all_users(db: Session = Depends(get_db)):
         }
         for user in users
     ]
+
+@router.get("/users/{user_id}")
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.Id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    return {
+        "id": user.Id,
+        "username": user.Username,
+        "email": user.Email,
+        "role": user.Role,
+        "createdAt": user.CreatedAt
+    }
+
+@router.put("/users/{user_id}")
+def update_user(user_id: int, user_update: UserUpdate = Body(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.Id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    if user_update.username is not None:
+        user.Username = user_update.username
+    if user_update.email is not None:
+        user.Email = user_update.email
+    if user_update.password is not None and user_update.password != "":
+        user.Password = user_update.password
+    db.commit()
+    db.refresh(user)
+    return {
+        "id": user.Id,
+        "username": user.Username,
+        "email": user.Email,
+        "role": user.Role,
+        "createdAt": user.CreatedAt
+    }

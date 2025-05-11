@@ -14,6 +14,7 @@ import UserMessages from './pages/user/UserMessages';
 import BrowseBooks from './pages/user/BrowseBooks';
 import BookDetails from './pages/user/BookDetails';
 import Favorites from './pages/user/Favorites';
+import UserProfile from './pages/user/UserProfile';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -94,6 +95,11 @@ function AppRoutes() {
       <Route path="/user/favorites" element={
         <ProtectedRoute>
           <Favorites />
+        </ProtectedRoute>
+      } />
+      <Route path="/user/profile" element={
+        <ProtectedRoute>
+          <UserProfile />
         </ProtectedRoute>
       } />
 
