@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { BookOpen, Book as Books, History, MessageSquare, Home, LogOut, Menu, X } from 'lucide-react';
+import { BookOpen, Book as Books, History, MessageSquare, Home, LogOut, Menu, X, Heart } from 'lucide-react';
 
 interface UserLayoutProps {
   children: React.ReactNode;
@@ -109,6 +109,20 @@ const UserLayout: React.FC<UserLayoutProps> = ({ children, title }) => {
             >
               <Books size={20} className="mr-3" />
               Browse Books
+            </NavLink>
+            <NavLink
+              to="/user/favorites"
+              className={({ isActive }) =>
+                `flex items-center p-3 rounded-lg transition-colors duration-200 ${
+                  isActive
+                    ? 'bg-primary-100 text-primary-800'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`
+              }
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <Heart size={20} className="mr-3" />
+              Favorites
             </NavLink>
             <NavLink
               to="/user/messages"
