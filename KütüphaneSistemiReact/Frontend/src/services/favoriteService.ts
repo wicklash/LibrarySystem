@@ -22,4 +22,4 @@ export const removeFromFavorites = async (userId: number, bookId: number): Promi
 export const checkFavorite = async (userId: number, bookId: number): Promise<boolean> => {
     const response = await axios.get(`${API_URL}/favorites/check/${userId}/${bookId}`);
     return response.data.is_favorite;
-}; 
+};
