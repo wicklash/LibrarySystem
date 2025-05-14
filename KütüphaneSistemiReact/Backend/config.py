@@ -1,6 +1,6 @@
 # MSSQL veritabanı bağlantı ayarları
 DATABASE_CONFIG = {
-    "server": "DESKTOP-7DBTR3S",                # SQL Server adı
+    "server": "DESKTOP-ECJJPMC\\SQLEXPRESS",                # SQL Server adı
     "database": "LibraryManagement",             # Veritabanı adı
     "username": "",                             # Kullanıcı adı (gerekirse ekleyin)
     "password": "",                             # Şifre (gerekirse ekleyin)
