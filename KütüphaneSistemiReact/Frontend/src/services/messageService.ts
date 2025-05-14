@@ -43,3 +43,11 @@ export const getUnreadMessageCount = async (userId: string): Promise<number> => 
   const data = await response.json();
   return data.unreadCount;
 };
+
+// Kullanıcının okunmamış mesaj sayısını getir (yeni endpoint)
+export const getUnreadMessageCountV2 = async (userId: string | number): Promise<number> => {
+  const response = await fetch(`http://localhost:8000/messages/unread/count/${userId}`);
+  if (!response.ok) throw new Error('Okunmamış mesaj sayısı alınamadı');
+  const data = await response.json();
+  return data.unreadCount;
+};

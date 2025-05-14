@@ -158,3 +158,29 @@ def get_all_active_borrows(db: Session = Depends(get_db)):
             }
         })
     return result
+
+@router.get("/overdue")
+def get_overdue_borrows(db: Session = Depends(get_db)):
+    now = datetime.now()
+    borrows = db.query(BorrowedBook).filter(
+        BorrowedBook.ReturnDate == None,
+        BorrowedBook.DueDate < now
+    ).all()
+    result = []
+    for borrow in borrows:
+        book = db.query(Book).filter(Book.Id == borrow.BookId).first()
+        result.append({
+            "id": borrow.Id,
+            "bookId": borrow.BookId,
+            "userId": borrow.UserId,
+            "borrowDate": borrow.BorrowDate.isoformat(),
+            "dueDate": borrow.DueDate.isoformat(),
+            "returnDate": borrow.ReturnDate.isoformat() if borrow.ReturnDate else None,
+            "book": {
+                "id": book.Id,
+                "title": book.Title,
+                "author": book.Author,
+                "coverImage": book.CoverImage
+            }
+        })
+    return result
