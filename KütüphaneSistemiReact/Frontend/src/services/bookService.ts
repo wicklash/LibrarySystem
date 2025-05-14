@@ -150,3 +150,24 @@ export const getAllActiveBorrows = async (): Promise<BorrowedBook[]> => {
   if (!response.ok) return [];
   return await response.json();
 };
+
+// Ödünç alınabilir kitapları getir
+export const getAvailableBooks = async () => {
+  const response = await fetch('http://localhost:8000/books/available');
+  if (!response.ok) throw new Error('Ödünç alınabilir kitaplar alınamadı');
+  return await response.json();
+};
+
+// Kitap kategorilerini ve kitap sayılarını getir
+export const getBookCategories = async () => {
+  const response = await fetch('http://localhost:8000/books/categories');
+  if (!response.ok) throw new Error('Kitap kategorileri alınamadı');
+  return await response.json();
+};
+
+// Tarihi geçen (overdue) borçları getir
+export const getOverdueBorrows = async () => {
+  const response = await fetch('http://localhost:8000/borrowed/overdue');
+  if (!response.ok) throw new Error('Tarihi geçen borçlar alınamadı');
+  return await response.json();
+};

@@ -19,7 +19,7 @@ import {
   borrowBook, 
   getAllBooks 
 } from '../../services/bookService';
-import { users } from '../../data/mockData';
+import { getAllUsers } from '../../services/userService';
 import { BorrowedBook, Book, User } from '../../types';
 
 const ManageBorrows: React.FC = () => {
@@ -37,6 +37,7 @@ const ManageBorrows: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [borrowFormErrors, setBorrowFormErrors] = useState<{book?: string; user?: string}>({});
   const [borrowingInProgress, setBorrowingInProgress] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,6 +59,18 @@ const ManageBorrows: React.FC = () => {
     };
 
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getAllUsers();
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchUsers();
   }, []);
 
   // Filter borrows based on search query and status
@@ -89,7 +102,7 @@ const ManageBorrows: React.FC = () => {
     }
     
     setFilteredBorrows(filtered);
-  }, [searchQuery, filterStatus, activeBorrows]);
+  }, [searchQuery, filterStatus, activeBorrows, users]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);

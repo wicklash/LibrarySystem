@@ -15,6 +15,45 @@ def get_db():
     finally:
         db.close()
 
+@router.get("/categories")
+def get_book_categories(db: Session = Depends(get_db)):
+    # Tüm kitapları çek
+    books = db.query(Book).all()
+    # Kategorileri ve sayıları hesapla
+    category_counts = {}
+    for book in books:
+        category = book.Category
+        if category in category_counts:
+            category_counts[category] += 1
+        else:
+            category_counts[category] = 1
+    # Sonucu uygun formatta döndür
+    return [
+        {"name": category, "count": count}
+        for category, count in category_counts.items()
+    ]
+
+@router.get("/available")
+def get_available_books(db: Session = Depends(get_db)):
+    books = db.query(Book).filter(Book.Available == True, Book.AvailableCopies > 0).all()
+    return [
+        {
+            "id": book.Id,
+            "title": book.Title,
+            "author": book.Author,
+            "description": book.Description,
+            "coverImage": book.CoverImage,
+            "isbn": book.ISBN,
+            "publishYear": book.PublishYear,
+            "category": book.Category,
+            "available": book.Available,
+            "totalCopies": book.TotalCopies,
+            "availableCopies": book.AvailableCopies,
+            "addedAt": book.AddedAt,
+        }
+        for book in books
+    ]
+
 @router.get("/{book_id}")
 def get_book_by_id(book_id: int, db: Session = Depends(get_db)):
     book = db.query(Book).filter(Book.Id == book_id).first()

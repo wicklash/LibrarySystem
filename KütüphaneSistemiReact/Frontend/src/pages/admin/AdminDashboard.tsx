@@ -13,9 +13,9 @@ import {
   BookPlus,
   MessageSquare,
 } from 'lucide-react';
-import { getAllActiveBorrows } from '../../services/bookService';
+import { getAllActiveBorrows, getAllBooks, getBookCategories, getOverdueBorrows } from '../../services/bookService';
 import { getUserMessages } from '../../services/messageService';
-import { libraryStats, users } from '../../data/mockData';
+import { getAllUsers } from '../../services/userService';
 import { BorrowedBook } from '../../types';
 import { format, isAfter } from 'date-fns';
 
@@ -24,39 +24,47 @@ const AdminDashboard: React.FC = () => {
   const [overdueBorrows, setOverdueBorrows] = useState<BorrowedBook[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [libraryStats, setLibraryStats] = useState<{ totalBooks: number, totalUsers: number, popularCategories: { name: string, count: number }[] }>({ totalBooks: 0, totalUsers: 0, popularCategories: [] });
+  const [users, setUsers] = useState<any[]>([]);
 
-  const { user } = { user: users.find(u => u.role === 'admin') };
+  const user = users.find(u => u.role === 'admin');
 
   useEffect(() => {
     const fetchData = async () => {
-      if (user) {
-        try {
-          const borrowsData = await getAllActiveBorrows();
-          const messages = await getUserMessages(user.id);
-          
-          // Filter overdue borrows
-          const overdue = borrowsData.filter(borrow => 
-            isAfter(new Date(), new Date(borrow.dueDate))
-          );
-          
-          // Count unread messages
-          const unread = messages.filter(
-            message => message.receiverId === user.id && !message.read
+      try {
+        const [borrowsData, allBooks, allCategories, allUsers, overdueBorrowsData] = await Promise.all([
+          getAllActiveBorrows(),
+          getAllBooks(),
+          getBookCategories(),
+          getAllUsers(),
+          getOverdueBorrows()
+        ]);
+        setUsers(allUsers);
+        const adminUser = allUsers.find(u => u.role === 'admin');
+        let unread = 0;
+        if (adminUser) {
+          const messages = await getUserMessages(adminUser.id);
+          unread = messages.filter(
+            message => message.receiverId === adminUser.id && !message.read
           ).length;
-          
-          setActiveBorrows(borrowsData);
-          setOverdueBorrows(overdue);
-          setUnreadMessages(unread);
-        } catch (error) {
-          console.error('Error fetching dashboard data:', error);
-        } finally {
-          setIsLoading(false);
         }
+        const popularCategories = allCategories.sort((a: {count: number}, b: {count: number}) => b.count - a.count).slice(0, 5);
+        setActiveBorrows(borrowsData);
+        setOverdueBorrows(overdueBorrowsData);
+        setUnreadMessages(unread);
+        setLibraryStats({
+          totalBooks: allBooks.length,
+          totalUsers: allUsers.length,
+          popularCategories
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-
     fetchData();
-  }, [user]);
+  }, []);
 
   return (
     <AdminLayout title="Admin Dashboard">

@@ -80,7 +80,10 @@ def mark_message_as_read(message_id: int, db: Session = Depends(get_db)):
     }
 
 # 4. Okunmamış mesaj sayısı
-@router.get("/unread/{user_id}")
+@router.get("/unread/count/{user_id}")
 def get_unread_message_count(user_id: int, db: Session = Depends(get_db)):
-    count = db.query(Message).filter(Message.ReceiverId == user_id, Message.Read == 0).count()
+    count = db.query(Message).filter(
+        Message.ReceiverId == user_id,
+        Message.Read == 0
+    ).count()
     return {"unreadCount": count}

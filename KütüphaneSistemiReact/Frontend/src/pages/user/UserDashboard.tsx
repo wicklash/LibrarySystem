@@ -5,27 +5,42 @@ import StatCard from '../../components/UI/StatCard';
 import { Card, CardHeader, CardBody } from '../../components/UI/Card';
 import Button from '../../components/UI/Button';
 import { Book, BookOpen, History, MessageSquare, Award } from 'lucide-react';
-import { libraryStats } from '../../data/mockData';
+import { getAllBooks, getBookCategories, getAvailableBooks } from '../../services/bookService';
 import { useAuth } from '../../context/AuthContext';
 import { getUserBorrowedBooks } from '../../services/bookService';
-import { getUnreadMessageCount } from '../../services/messageService';
+import { getActiveBorrowCount } from '../../services/userService';
+import { getUnreadMessageCountV2 } from '../../services/messageService';
 import { BorrowedBook } from '../../types';
 
 const UserDashboard: React.FC = () => {
   const { user } = useAuth();
   const [activeBorrows, setActiveBorrows] = useState<BorrowedBook[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [activeBorrowCount, setActiveBorrowCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [libraryStats, setLibraryStats] = useState<{ totalBooks: number, popularCategories: { name: string, count: number }[] }>({ totalBooks: 0, popularCategories: [] });
+  const [availableBooksCount, setAvailableBooksCount] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
         try {
           const borrowsData = await getUserBorrowedBooks(user.id);
-          const messagesCount = await getUnreadMessageCount(user.id);
-          
+          const messagesCount = await getUnreadMessageCountV2(Number(user.id));
+          const borrowCount = await getActiveBorrowCount(Number(user.id));
+          const books = await getAllBooks();
+          const categories = await getBookCategories();
+          const availableBooks = await getAvailableBooks();
+          // Popüler kategoriler (en çok kitaba sahip ilk 5 kategori)
+          const popularCategories = categories.sort((a: {count: number}, b: {count: number}) => b.count - a.count).slice(0, 5);
           setActiveBorrows(borrowsData);
           setUnreadMessages(messagesCount);
+          setActiveBorrowCount(borrowCount);
+          setAvailableBooksCount(availableBooks.length);
+          setLibraryStats({
+            totalBooks: books.length,
+            popularCategories
+          });
         } catch (error) {
           console.error('Error fetching dashboard data:', error);
         } finally {
@@ -52,13 +67,13 @@ const UserDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Available Books"
-            value={libraryStats.totalBooks}
+            value={availableBooksCount}
             icon={<Book size={24} />}
             color="primary"
           />
           <StatCard
             title="Your Active Borrows"
-            value={activeBorrows.length}
+            value={activeBorrowCount}
             icon={<BookOpen size={24} />}
             color="secondary"
           />
