@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Book
+from datetime import datetime
 
 router = APIRouter(
     prefix="/books",
@@ -133,9 +134,33 @@ def update_book(book_id: int, updates: dict, db: Session = Depends(get_db)):
     book = db.query(Book).filter(Book.Id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
+
+    # Frontend ile model alanları arasındaki eşleşme
+    field_map = {
+        "title": "Title",
+        "author": "Author",
+        "description": "Description",
+        "coverImage": "CoverImage",
+        "isbn": "ISBN",
+        "publishYear": "PublishYear",
+        "category": "Category",
+        "available": "Available",
+        "totalCopies": "TotalCopies",
+        "availableCopies": "AvailableCopies",
+        "addedAt": "AddedAt",
+    }
+
     for key, value in updates.items():
-        if hasattr(book, key):
-            setattr(book, key, value)
+        model_key = field_map.get(key)
+        if model_key and hasattr(book, model_key):
+            # Eğer AddedAt alanı güncelleniyorsa, stringi datetime'a çevir
+            if model_key == "AddedAt" and isinstance(value, str):
+                try:
+                    value = datetime.fromisoformat(value)
+                except ValueError:
+                    raise HTTPException(status_code=400, detail="Invalid date format for AddedAt")
+            setattr(book, model_key, value)
+
     db.commit()
     db.refresh(book)
     return {
